@@ -1,16 +1,8 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-} from '@nestjs/common';
-import { Public } from 'src/decorators/setMetaData';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Public } from '@/decorators/setMetaData';
 import { AuthService } from './auth.service';
 import { SignInAuthDto, SignUpAuthDto } from './dto';
-import { Request } from 'express';
-import { User } from 'src/decorators/getUser';
+import { User } from '@/decorators/getUser';
 
 @Controller('auth')
 export class AuthContoller {
@@ -18,22 +10,22 @@ export class AuthContoller {
 
   @Public()
   @Post('signup')
+  @HttpCode(HttpStatus.CREATED)
   signup(@Body() dto: SignUpAuthDto) {
     return this.authService.signUp(dto);
   }
 
   @Public()
   @Post('signin')
+  @HttpCode(HttpStatus.OK)
   signin(@Body() dto: SignInAuthDto) {
     return this.authService.signIn(dto);
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Req() req: Request) {
-    const user = req.user;
-    console.log(user);
-    return this.authService.logout(user['email']);
+  logout(@User('email') email: string) {
+    return this.authService.logout(email);
   }
 
   @Post('refresh')

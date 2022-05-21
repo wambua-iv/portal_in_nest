@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Users, UserDocument } from 'src/models/users.schema';
+import { Users, UserDocument } from '@/models/users.schema';
 
 @Injectable({})
 export class AuthService {
@@ -29,7 +29,9 @@ export class AuthService {
     const newUser = new this.UserModel({
       name: dto.name,
       email: dto.email,
+      user_Id: dto.user_Id,
       hash: hash,
+      role: 'user',
     });
 
     const user = await newUser

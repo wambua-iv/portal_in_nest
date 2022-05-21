@@ -13,6 +13,9 @@ export class SignUpAuthDto {
   email: string;
 
   @IsNotEmpty()
+  user_Id: string;
+
+  @IsNotEmpty()
   password: string;
 }
 
