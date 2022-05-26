@@ -6,7 +6,12 @@ import { Connection } from 'mongoose';
 import { DatabaseService } from '@/database/databse.service';
 import { SignInAuthDto, SignUpAuthDto } from '@/auth/dto';
 import { UpdateDto } from '@/administration/dto';
-import { StudentIdDto } from '@/students/dto';
+import {
+  SemesterRegDto,
+  SemesterTitleDto,
+  StudentEmailDto,
+  StudentIdDto,
+} from '@/students/dto';
 import { StudentReturnType } from '@/administration/Utils';
 
 describe('App e2e', () => {
@@ -119,19 +124,107 @@ describe('App e2e', () => {
       const dto: StudentIdDto = {
         user_Id: 'ict-341',
       };
-      // const returnType: StudentReturnType = {
-      //   name: {
-      //     firstname: 'messy',
-      //     lastname: 'wambua',
-      //   },
-      //   user_Id: 'ict-341',
-      //   email: 'messydev@gmail.com',
-      // };
 
       it('should get student by Id', () => {
         return pactum
           .spec()
           .get('http://localhost:3080/admin/student')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody(dto)
+          .expectStatus(302)
+          .inspect();
+      });
+    });
+  });
+
+  describe('Student', () => {
+    describe('get student profile', () => {
+      const dto: StudentEmailDto = {
+        email: 'messy@gmail.com',
+      };
+      it('get student details', () => {
+        return pactum
+          .spec()
+          .get('http://localhost:3080/student/profile')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody(dto)
+          .expectStatus(302)
+          .inspect();
+      });
+    });
+
+    describe('register new semester', () => {
+      const dto: SemesterRegDto = {
+        user_Id: 'ict-341',
+        semester: 'semester one year one',
+        status: 'pending',
+        date: 20220305,
+        units: [
+          {
+            name: 'forensics',
+            code: 'fc 100',
+            status: 'pending',
+          },
+        ],
+        fee: [],
+      };
+
+      it('should register new semester', () => {
+        return pactum
+          .spec()
+          .post('http://localhost:3080/student/register_semester')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody(dto)
+          .expectStatus(202)
+          .inspect();
+      });
+
+      it('should fail registration of duplicate semester', () => {
+        return pactum
+          .spec()
+          .post('http://localhost:3080/student/register_semester')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody(dto)
+          .expectBodyContains('status')
+          .expectStatus(202)
+          .inspect();
+      });
+    });
+
+    describe('check active semesters', () => {
+      const dto: StudentIdDto = {
+        user_Id: 'ict-341',
+      };
+      it('should return registered semesters', () => {
+        return pactum
+          .spec()
+          .get('http://localhost:3080/student/check_active_semester')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .withBody(dto)
+          .expectStatus(302)
+          .inspect();
+      });
+    });
+
+    describe('should get semester by title', () => {
+      const dto: SemesterTitleDto = {
+        user_Id: 'ict-341',
+        title: 'semester one year one',
+      };
+      it('should return semester  defined by the title', () => {
+        return pactum
+          .spec()
+          .get('http://localhost:3080/student/get_semester')
           .withHeaders({
             Authorization: 'Bearer $S{userAt}',
           })
